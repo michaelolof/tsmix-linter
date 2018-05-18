@@ -1,0 +1,1 @@
+A wrapper API for easing handling of the typescript API
