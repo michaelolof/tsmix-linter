@@ -124,10 +124,13 @@ var DecoratorLinter = /** @class */ (function () {
                                 continue;
                             for (var _a = 0, thisCalls_1 = thisCalls; _a < thisCalls_1.length; _a++) {
                                 var thisCall = thisCalls_1[_a];
+                                var nameRange = arg.getNameRange();
+                                if (self.clientHasTSIgnoreFlag(self.source, nameRange))
+                                    continue;
                                 if (clientMembersName.indexOf(thisCall.name) < 0) {
                                     var code = thisCall.type === "method" ? "this." + thisCall.name + "(...) method" : "this." + thisCall.name + " property";
                                     var message = "Mixin Dependency Not Found: \n" + code + " not found. \nDelegated method " + arg.name + " calls a " + code + " which is not declared in the client " + cls.name + " class";
-                                    diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, arg.filePath, arg.getNameRange(), message));
+                                    diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, arg.filePath, nameRange, message));
                                 }
                             }
                         }
@@ -237,8 +240,11 @@ var DecoratorLinter = /** @class */ (function () {
                         var diagnostics = [];
                         var clientHasMixinMember = clientMembers.contains(mixinMember, function (clientMember, mixinMember) { return clientMember.memberName === mixinMember.memberName && clientMember.signature === mixinMember.signature; });
                         if (!clientHasMixinMember) {
+                            var nameRange = client.getNameRange();
+                            if (self.clientHasTSIgnoreFlag(self.source, nameRange))
+                                return diagnostics;
                             var message = "Mixin dependency not found. \n(property) '" + mixinMember.memberName + ":" + mixinMember.signature + "' found in mixin " + mixinHolder.holderName + " is missing in the implementing class '" + client.name + "'.";
-                            diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, client.filePath, client.getNameRange(), message));
+                            diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, client.filePath, nameRange, message));
                         }
                         return diagnostics;
                     }
@@ -255,8 +261,11 @@ var DecoratorLinter = /** @class */ (function () {
                                 continue;
                             }
                             else {
+                                var nameRange = clientSignature.mixinArgument.getNameRange();
+                                if (self.clientHasTSIgnoreFlag(self.source, nameRange))
+                                    continue;
                                 var message = "Mixin is not self contained. \nMixin method " + mixinHolder.holderName + "." + mixinMember.memberName + "(...) calls " + methodThisCall.codeFormat + " which is not defined in the mixin at " + mixinHolder.filePath + ". \nEnsure mixin is self contained or use another mixin.";
-                                diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, client.filePath, clientSignature.mixinArgument.getNameRange(), message));
+                                diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, client.filePath, nameRange, message));
                             }
                         }
                         return diagnostics;
@@ -366,6 +375,15 @@ var DecoratorLinter = /** @class */ (function () {
             };
         });
         return memberToDecorator;
+    };
+    DecoratorLinter.prototype.clientHasTSIgnoreFlag = function (clientSource, clientRange) {
+        var lineContent = clientSource.getFullText().split("\n")[clientRange.start.line - 1];
+        if (lineContent === undefined)
+            return false;
+        if (lineContent.includes("//") && lineContent.includes("@ts-ignore"))
+            return true;
+        else
+            return false;
     };
     DecoratorLinter.UseDecoratorId = "use";
     DecoratorLinter.DelegateDecoratorId = "delegate";

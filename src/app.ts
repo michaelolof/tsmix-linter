@@ -1,7 +1,7 @@
 import { 
   CompilerOptions, ModuleResolutionKind, ModuleKind, ScriptTarget, createWatchProgram, 
   createWatchCompilerHost, WatchCompilerHostOfFilesAndCompilerOptions, BuilderProgram, 
-  sys, WatchOfFilesAndCompilerOptions, createProgram } from 'typescript';
+  sys, WatchOfFilesAndCompilerOptions, createProgram, } from 'typescript';
 import { findAllTSFiles } from './utilities';
 import { validateAll } from '.';
 import { Diagnostic } from 'ts-parser';
@@ -33,6 +33,14 @@ export const App = {
     App.program = App.watchProgram.getProgram() 
   },
 
+  stopWatcher() {
+    App.rootFolder = undefined
+    App.rootFiles = undefined;
+    App.host = undefined
+    App.watchProgram = undefined
+    App.program = undefined;
+  },
+
   async launchCompiler(filePath:string):Promise<Diagnostic[]> {
     const program = createProgram( [ filePath ], this.compilerOptions );
     return validateAll( program, [filePath] );
@@ -41,7 +49,7 @@ export const App = {
   defaultDoneCompiling( program:BuilderProgram ) {
     App.program = program;
     App.finishedCompiling = true;
-  }
+  },
 }
 
 export const constants = {

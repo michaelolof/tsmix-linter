@@ -9,6 +9,7 @@ export declare const App: {
     finishedCompiling: boolean;
     compilerOptions: CompilerOptions;
     launchWatcher(rootFolder: string, doneCompiling?: ((program: BuilderProgram) => void) | undefined): void;
+    stopWatcher(): void;
     launchCompiler(filePath: string): Promise<Diagnostic[]>;
     defaultDoneCompiling(program: BuilderProgram): void;
 };

@@ -11,4 +11,5 @@ export declare class DecoratorLinter {
     private isMixinLocalDeclared(mixinName, classesOrVariables);
     private isClassAUseDecoratorClient(cls);
     private isClassADelegateDecoratorClient(cls);
+    private clientHasTSIgnoreFlag(clientSource, clientRange);
 }

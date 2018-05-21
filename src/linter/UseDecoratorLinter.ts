@@ -1,7 +1,7 @@
 import { SourceFile, TypeChecker, Program, MethodDeclaration } from 'typescript';
 import { 
   Import, Class, find, Variable, Argument, createErrorDiagnostic, Diagnostic, SymbolizedHolder, 
-  SymbolizedMemberArray, SymbolizedMember, ThisCall, Mixin } from "ts-parser"
+  SymbolizedMemberArray, SymbolizedMember, ThisCall, Mixin, Range } from "ts-parser"
 import { MixinStore } from './index';
 import { constants } from '../app';
 
@@ -95,6 +95,9 @@ export class DecoratorLinter {
           const clientMembersName = cls.getMembers().map( m => m.name );
           if( thisCalls.length === 0 ) continue;
           for(let thisCall of thisCalls) {
+            const nameRange = arg.getNameRange();
+            if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) continue;
+
             if( clientMembersName.indexOf( thisCall.name ) < 0 ) {
               const code = thisCall.type === "method" ? "this."+ thisCall.name + "(...) method" : "this." + thisCall.name + " property";
               const message = `Mixin Dependency Not Found: \n${code} not found. \nDelegated method ${arg.name} calls a ${code} which is not declared in the client ${cls.name} class`;
@@ -102,7 +105,7 @@ export class DecoratorLinter {
                 createErrorDiagnostic( 
                   constants.appName,
                   arg.filePath,
-                  arg.getNameRange(),
+                  nameRange,
                   message,
                 )
               )
@@ -194,8 +197,18 @@ export class DecoratorLinter {
         const diagnostics:Diagnostic[] = [];
         const clientHasMixinMember = clientMembers.contains( mixinMember, (clientMember, mixinMember) => clientMember.memberName === mixinMember.memberName && clientMember.signature === mixinMember.signature );
         if( !clientHasMixinMember ) {
+          const nameRange = client.getNameRange();
+          if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) return diagnostics;
+
           const message = `Mixin dependency not found. \n(property) '${ mixinMember.memberName }:${ mixinMember.signature }' found in mixin ${ mixinHolder.holderName } is missing in the implementing class '${ client.name }'.`;
-          diagnostics.push( createErrorDiagnostic( constants.appName, client.filePath, client.getNameRange(), message ) );
+          diagnostics.push( 
+            createErrorDiagnostic( 
+              constants.appName, 
+              client.filePath, 
+              nameRange, 
+              message 
+            ) 
+          );
         }
         return diagnostics;
       }
@@ -211,8 +224,18 @@ export class DecoratorLinter {
           if( mixinMembers.hasThisCallMember( methodThisCall ) ) { 
             continue;
           } else {
+            const nameRange = clientSignature.mixinArgument.getNameRange();
+            if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) continue;
+
             const message = `Mixin is not self contained. \nMixin method ${mixinHolder.holderName}.${mixinMember.memberName}(...) calls ${ methodThisCall.codeFormat } which is not defined in the mixin at ${mixinHolder.filePath}. \nEnsure mixin is self contained or use another mixin.`;
-            diagnostics.push( createErrorDiagnostic( constants.appName, client.filePath, clientSignature.mixinArgument.getNameRange(), message ))
+            diagnostics.push( 
+              createErrorDiagnostic( 
+                constants.appName, 
+                client.filePath, 
+                nameRange,
+                message 
+              )
+            )
           }
         }
         return diagnostics;
@@ -247,6 +270,13 @@ export class DecoratorLinter {
       }
     });
     return memberToDecorator;
+  }
+
+  private clientHasTSIgnoreFlag(clientSource:SourceFile, clientRange:Range) {
+    const lineContent = clientSource.getFullText().split("\n")[ clientRange.start.line - 1 ];
+    if( lineContent === undefined ) return false;
+    if( lineContent.includes("//") && lineContent.includes("@ts-ignore") ) return true;
+    else return false
   }
 
 }

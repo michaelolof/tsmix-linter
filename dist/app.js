@@ -62,6 +62,13 @@ exports.App = {
         exports.App.watchProgram = typescript_1.createWatchProgram(exports.App.host);
         exports.App.program = exports.App.watchProgram.getProgram();
     },
+    stopWatcher: function () {
+        exports.App.rootFolder = undefined;
+        exports.App.rootFiles = undefined;
+        exports.App.host = undefined;
+        exports.App.watchProgram = undefined;
+        exports.App.program = undefined;
+    },
     launchCompiler: function (filePath) {
         return __awaiter(this, void 0, void 0, function () {
             var program;
@@ -74,7 +81,7 @@ exports.App = {
     defaultDoneCompiling: function (program) {
         exports.App.program = program;
         exports.App.finishedCompiling = true;
-    }
+    },
 };
 exports.constants = {
     appName: "tsmix-linter",
