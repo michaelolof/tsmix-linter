@@ -1,0 +1,50 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js
+
+PATH: 
+  C:\cmder\bin;C:\Program Files\Git\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\share\vim\vim74;C:\cmder\vendor\conemu-maximus5\ConEmu\Scripts;C:\cmder\vendor\conemu-maximus5;C:\cmder\vendor\conemu-maximus5\ConEmu;C:\ProgramData\Oracle\Java\javapath;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\laragon\bin\php\php-7.1.5-Win32-VC14-x64;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files\nodejs\;C:\xampp\php;C:\Program Files\Git\cmd;C:\Ruby24-x64\bin;C:\Program Files (x86)\Yarn\bin;C:\Program Files\Manual_CLI;C:\Program Files\MongoDB\Server\3.4\bin;C:\Python27;C:\Python27\Scripts;C:\Users\Michael\.windows-build-tools\vv;C:\Users\Michael\Desktop\M.O.O\Programs\bin\phantomjs-2.1.1-windows\bin;C:\OpenCV\build\x64\vc14\bin;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\laragon\bin\mysql\mysql-5.7.18-winx64\bin;C:\Program Files\hlint-2.0.12;C:\kotlinc\bin;C:\Ruby24-x64\bin;C:\Users\Michael\AppData\Local\Microsoft\WindowsApps;C:\Program Files (x86)\Microsoft VS Code\bin;C:\Users\Michael\AppData\Roaming\npm;C:\Users\Michael\AppData\Local\Yarn\bin;C:\Users\Michael\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin;C:\Users\Michael\Desktop\M.O.O\Programs\bin;C:\Users\Michael\Desktop\M.O.O\Programs\bin\bash;;C:\Program Files\Microsoft VS Code Insiders\bin;C:\cmder
+
+Yarn version: 
+  0.27.5
+
+Node version: 
+  6.9.4
+
+Platform: 
+  win32 x64
+
+npm manifest: 
+  {
+    "name": "tsmix-linter",
+    "version": "1.0.2",
+    "preferGlobal": "true",
+    "bin": "dist/bin",
+    "typings": "dist/index.d.ts",
+    "description": "A linter for the typescript based on the typescript-mix library",
+    "main": "dist/index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "michaelolof",
+    "license": "ISC",
+    "dependencies": {
+      "glob": "^7.1.2",
+      "ts-parser": "git+https://github.com/michaelolof/ts-parser.git",
+      "typescript": "^2.8.3"
+    },
+    "devDependencies": {
+      "@types/glob": "^5.0.35"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
+
+Trace: 
+  Error: getaddrinfo ENOENT registry.yarnpkg.com:443
+      at Object.exports._errnoException (util.js:1022:11)
+      at errnoException (dns.js:33:15)
+      at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:76:26)

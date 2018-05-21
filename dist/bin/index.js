@@ -96,7 +96,7 @@ function logMatcher(diagnostic, log) {
     }
 }
 function normalLogger(diagnostic) {
-    console.warn("error:(" + diagnostic.range.start.line + "," + diagnostic.range.start.character + ")", diagnostic.message.replace("\n", ""), "on", diagnostic.filePath);
+    console.warn("error:(" + (diagnostic.range.start.line + 1) + "," + diagnostic.range.start.character + ")", diagnostic.message.replace("\n", ""), "on", diagnostic.filePath);
     console.log("\n");
 }
 function diagnosticLogger(diagnostic) {
@@ -105,7 +105,7 @@ function diagnosticLogger(diagnostic) {
 }
 function minimalLogger(diagnostic) {
     var rel = diagnostic.filePath.replace(process.cwd().replace("\\", "/"), "");
-    console.warn("error: (" + diagnostic.range.start.line + "," + diagnostic.range.start.character + "). " + diagnostic.message.split("\n")[0] + " on " + rel);
+    console.warn("error: (" + (diagnostic.range.start.line + 1) + "," + diagnostic.range.start.character + "). " + diagnostic.message.split("\n")[0] + " on " + rel);
     console.log("\n");
 }
 //# sourceMappingURL=index.js.map

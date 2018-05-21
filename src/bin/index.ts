@@ -121,7 +121,7 @@ function logMatcher( diagnostic:Diagnostic, log:LogParam) {
 }
 
 function normalLogger(diagnostic:Diagnostic) {
-  console.warn( `error:(${diagnostic.range.start.line},${diagnostic.range.start.character})`, diagnostic.message.replace("\n", ""), "on", diagnostic.filePath ) 
+  console.warn( `error:(${diagnostic.range.start.line + 1},${diagnostic.range.start.character})`, diagnostic.message.replace("\n", ""), "on", diagnostic.filePath ) 
   console.log("\n");  
 }
 
@@ -132,7 +132,7 @@ function diagnosticLogger(diagnostic: Diagnostic) {
 
 function minimalLogger(diagnostic:Diagnostic) {
   const rel = diagnostic.filePath.replace( process.cwd().replace("\\", "/"), "" );
-  console.warn(`error: (${diagnostic.range.start.line},${diagnostic.range.start.character}). ${diagnostic.message.split("\n")[0]} on ${rel}` );
+  console.warn(`error: (${diagnostic.range.start.line + 1},${diagnostic.range.start.character}). ${diagnostic.message.split("\n")[0]} on ${rel}` );
   console.log("\n");
 }
 
