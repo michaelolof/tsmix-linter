@@ -8,9 +8,10 @@ export declare const App: {
     rootFiles: string[] | undefined;
     finishedCompiling: boolean;
     compilerOptions: CompilerOptions;
-    launchWatcher(rootFolder: string, doneCompiling?: ((program: BuilderProgram) => void) | undefined): void;
-    stopWatcher(): void;
-    launchCompiler(filePath: string): Promise<Diagnostic[]>;
+    compileFilesInFolder(rootFolder: string): Promise<Diagnostic[]>;
+    watchFilesInFolder(rootFolder: string, doneCompiling?: ((program: BuilderProgram) => void) | undefined): void;
+    compileFile(filePath: string): Promise<Diagnostic[]>;
+    watchFile(filePath: string, doneCompiling?: ((program: BuilderProgram) => void) | undefined): Promise<void>;
     defaultDoneCompiling(program: BuilderProgram): void;
 };
 export declare const constants: {

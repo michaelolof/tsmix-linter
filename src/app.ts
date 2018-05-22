@@ -6,6 +6,9 @@ import { findAllTSFiles } from './utilities';
 import { validateAll } from '.';
 import { Diagnostic } from 'ts-parser';
 
+const $watcher = Symbol("watcher");
+const $compiler = Symbol("compiler");
+
 export const App = {
   watchProgram:undefined as WatchOfFilesAndCompilerOptions<BuilderProgram>|undefined,
   program:undefined as BuilderProgram|undefined,
@@ -24,26 +27,21 @@ export const App = {
     noEmitOnError: true,
   } as CompilerOptions,
 
-  launchWatcher(rootFolder:string, doneCompiling?:(program:BuilderProgram) => void ) {
+  compileFilesInFolder(rootFolder:string):Promise<Diagnostic[]> {
+    return app.compile( findAllTSFiles( rootFolder ) )
+  },
+
+  watchFilesInFolder(rootFolder:string, doneCompiling?:(program:BuilderProgram) => void ) {
     App.rootFolder = rootFolder;
-    App.rootFiles = findAllTSFiles( rootFolder );
-    App.host = createWatchCompilerHost( App.rootFiles, App.compilerOptions, sys )
-    App.host.afterProgramCreate = doneCompiling || this.defaultDoneCompiling
-    App.watchProgram = createWatchProgram( App.host );
-    App.program = App.watchProgram.getProgram() 
+    app.watch( findAllTSFiles( App.rootFolder ), doneCompiling )
   },
 
-  stopWatcher() {
-    App.rootFolder = undefined
-    App.rootFiles = undefined;
-    App.host = undefined
-    App.watchProgram = undefined
-    App.program = undefined;
+  async compileFile(filePath:string):Promise<Diagnostic[]> {
+    return app.compile( [ filePath ] );
   },
 
-  async launchCompiler(filePath:string):Promise<Diagnostic[]> {
-    const program = createProgram( [ filePath ], this.compilerOptions );
-    return validateAll( program, [filePath] );
+  async watchFile(filePath:string, doneCompiling?:(program:BuilderProgram) => void ) {
+    app.watch( [ filePath ], doneCompiling )
   },
 
   defaultDoneCompiling( program:BuilderProgram ) {
@@ -52,9 +50,24 @@ export const App = {
   },
 }
 
+
+
 export const constants = {
   appName: "tsmix-linter",
   moduleName: "typescript-mix"
 }
 
 
+const app = {
+  compile(filePaths:string[]):Promise<Diagnostic[]> {
+    return validateAll( createProgram( filePaths, App.compilerOptions ), filePaths );
+  },
+
+  watch(filePaths:string[], doneCompiling?:(program:BuilderProgram) => void ) {
+    App.rootFiles = filePaths;
+    App.host = createWatchCompilerHost( filePaths, App.compilerOptions, sys )
+    App.host.afterProgramCreate = doneCompiling || App.defaultDoneCompiling
+    App.watchProgram = createWatchProgram( App.host );
+    App.program = App.watchProgram.getProgram() 
+  },
+}

@@ -38,6 +38,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var typescript_1 = require("typescript");
 var utilities_1 = require("./utilities");
 var _1 = require(".");
+var $watcher = Symbol("watcher");
+var $compiler = Symbol("compiler");
 exports.App = {
     watchProgram: undefined,
     program: undefined,
@@ -54,27 +56,25 @@ exports.App = {
         noEmit: true,
         noEmitOnError: true,
     },
-    launchWatcher: function (rootFolder, doneCompiling) {
+    compileFilesInFolder: function (rootFolder) {
+        return app.compile(utilities_1.findAllTSFiles(rootFolder));
+    },
+    watchFilesInFolder: function (rootFolder, doneCompiling) {
         exports.App.rootFolder = rootFolder;
-        exports.App.rootFiles = utilities_1.findAllTSFiles(rootFolder);
-        exports.App.host = typescript_1.createWatchCompilerHost(exports.App.rootFiles, exports.App.compilerOptions, typescript_1.sys);
-        exports.App.host.afterProgramCreate = doneCompiling || this.defaultDoneCompiling;
-        exports.App.watchProgram = typescript_1.createWatchProgram(exports.App.host);
-        exports.App.program = exports.App.watchProgram.getProgram();
+        app.watch(utilities_1.findAllTSFiles(exports.App.rootFolder), doneCompiling);
     },
-    stopWatcher: function () {
-        exports.App.rootFolder = undefined;
-        exports.App.rootFiles = undefined;
-        exports.App.host = undefined;
-        exports.App.watchProgram = undefined;
-        exports.App.program = undefined;
-    },
-    launchCompiler: function (filePath) {
+    compileFile: function (filePath) {
         return __awaiter(this, void 0, void 0, function () {
-            var program;
             return __generator(this, function (_a) {
-                program = typescript_1.createProgram([filePath], this.compilerOptions);
-                return [2 /*return*/, _1.validateAll(program, [filePath])];
+                return [2 /*return*/, app.compile([filePath])];
+            });
+        });
+    },
+    watchFile: function (filePath, doneCompiling) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                app.watch([filePath], doneCompiling);
+                return [2 /*return*/];
             });
         });
     },
@@ -86,5 +86,17 @@ exports.App = {
 exports.constants = {
     appName: "tsmix-linter",
     moduleName: "typescript-mix"
+};
+var app = {
+    compile: function (filePaths) {
+        return _1.validateAll(typescript_1.createProgram(filePaths, exports.App.compilerOptions), filePaths);
+    },
+    watch: function (filePaths, doneCompiling) {
+        exports.App.rootFiles = filePaths;
+        exports.App.host = typescript_1.createWatchCompilerHost(filePaths, exports.App.compilerOptions, typescript_1.sys);
+        exports.App.host.afterProgramCreate = doneCompiling || exports.App.defaultDoneCompiling;
+        exports.App.watchProgram = typescript_1.createWatchProgram(exports.App.host);
+        exports.App.program = exports.App.watchProgram.getProgram();
+    },
 };
 //# sourceMappingURL=app.js.map
