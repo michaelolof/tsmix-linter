@@ -124,7 +124,6 @@ function parseArguments(args:string[]):Lintable | Logger {
   //--------------------------------------------------------------------------------
 }
 
-
 function validateLog(log:string):(diagnostic:Diagnostic) => void {
   switch( log as LogOptions ) {
     case "diagnostic": return diagnosticLogger
@@ -143,22 +142,6 @@ function argumentHasFlag(argument:string[], defaultFlag:DefaultFlags, optionalFl
 
 function removeFlagFromArgument(argument:string[], flagLocationIndex:number) {
   argument.splice( flagLocationIndex, 1 )
-}
-
-function lintFile(fileName:string, log:LogOptions) {
-  fileName = normalizePath( fileName )
-  App
-  .compileFile( fileName )
-  .then( diagnostics => diagnostics.map( diagnostic => logMatcher(  diagnostic, log ) ) );  
-}
-
-function lintFileByRootPath(rootPath:string, log:LogOptions) {
-  App.watchFilesInFolder( rootPath, program => {
-    if( App.rootFiles ) {
-      validateAll( program.getProgram(), App.rootFiles )
-      .then( diagnostics => diagnostics.map( diagnostic => logMatcher(  diagnostic, log ) ) );  
-    }
-  });
 }
 
 function logMatcher( diagnostic:Diagnostic, log:LogOptions) {

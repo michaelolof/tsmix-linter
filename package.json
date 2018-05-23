@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "glob": "^7.1.2",
-    "ts-parser": "file:///C:\\Users\\Michael\\Desktop\\M.O.O\\Programs\\custom-npm-modules\\ts-parser",
+    "ts-parser": "git+https://github.com/michaelolof/ts-parser.git",
     "typescript": "^2.8.3"
   },
   "devDependencies": {
