@@ -59,13 +59,11 @@ var Class = (function () {
         for (var _i = 0, memberElements_1 = memberElements; _i < memberElements_1.length; _i++) {
             var memberElement = memberElements_1[_i];
             var member = new Member_1.ClassMember(memberElement, this.filePath);
+            if (member.name === "constructor")
+                continue;
             this.__members.push(member);
         }
         return this.__members;
-    };
-    Class.prototype.getAllMembers = function () {
-        console.log(this.element["localSymbol"]["exportSymbol"]["members"].keys());
-        throw new Error("Just die");
     };
     Class.prototype.getMembersSymbol = function () {
         if (this.element["symbol"] === undefined)

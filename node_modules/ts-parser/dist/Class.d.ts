@@ -10,7 +10,6 @@ export declare class Class {
     constructor(element: ClassDeclaration, filePath: string);
     readonly name: string;
     getMembers(): ClassMember[];
-    getAllMembers(): void;
     getMembersSymbol(): Map<string, Symbol> | undefined;
     hasMembersUsingDecorator(decoratorName: string): ClassMember[];
     getMemberUsingDecorator(decoratorName: string, memberName: string): ClassMember | undefined;

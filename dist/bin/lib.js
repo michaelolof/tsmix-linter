@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var app_1 = require("../app");
 var __1 = require("..");
-var utilities_1 = require("../utilities");
 /**
  * This program represents the command line interface for the tsmix-linter library
  * ---------------------------------------------------------------------------------------
@@ -127,20 +126,6 @@ function argumentHasFlag(argument, defaultFlag, optionalFlag) {
 }
 function removeFlagFromArgument(argument, flagLocationIndex) {
     argument.splice(flagLocationIndex, 1);
-}
-function lintFile(fileName, log) {
-    fileName = utilities_1.normalizePath(fileName);
-    app_1.App
-        .compileFile(fileName)
-        .then(function (diagnostics) { return diagnostics.map(function (diagnostic) { return logMatcher(diagnostic, log); }); });
-}
-function lintFileByRootPath(rootPath, log) {
-    app_1.App.watchFilesInFolder(rootPath, function (program) {
-        if (app_1.App.rootFiles) {
-            __1.validateAll(program.getProgram(), app_1.App.rootFiles)
-                .then(function (diagnostics) { return diagnostics.map(function (diagnostic) { return logMatcher(diagnostic, log); }); });
-        }
-    });
 }
 function logMatcher(diagnostic, log) {
     switch (log) {
