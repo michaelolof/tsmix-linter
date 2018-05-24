@@ -50,6 +50,7 @@ export class DecoratorLinter {
 
       const mixinArguments = client.arguments;
       const symbolizedMembers = cls.getMembersSymbolizedMemberArray( self.checker ); /** Its redundant calling this over and over again. */
+      
       for (let mixinArgument of mixinArguments) {
         const clientSignature:ClientSignature = {
           client: cls,

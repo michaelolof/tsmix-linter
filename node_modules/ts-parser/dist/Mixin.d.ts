@@ -6,5 +6,5 @@ export declare type MixinDeclaration = ClassDeclaration | VariableDeclaration;
 export declare const Mixin: {
     IsAMixin(node: Node): node is MixinDeclaration;
     Find(source: SourceFile): Promise<Mixin[] | undefined>;
-    FindWhere(source: SourceFile, whereCondition: (mixin: Mixin) => boolean): Variable | Class | undefined;
+    FindWhere(source: SourceFile, whereCondition: (mixin: Mixin) => boolean): Class | Variable | undefined;
 };

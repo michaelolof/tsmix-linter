@@ -14,4 +14,3 @@ __export(require("./Program"));
 __export(require("./Statement"));
 __export(require("./utilities"));
 __export(require("./Variable"));
-//# sourceMappingURL=index.js.map

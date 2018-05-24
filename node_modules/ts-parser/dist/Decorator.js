@@ -42,4 +42,3 @@ var Decorator = (function () {
     return Decorator;
 }());
 exports.Decorator = Decorator;
-//# sourceMappingURL=Decorator.js.map

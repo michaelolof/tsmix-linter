@@ -1,4 +1,4 @@
-import { Node, MethodDeclaration, SourceFile, Block, TypeChecker } from 'typescript';
+import { Node, MethodDeclaration, SourceFile, Block, TypeChecker, Symbol } from 'typescript';
 import { Decorator } from './Decorator';
 import { ThisCall } from './Statement';
 import { Range } from './utilities';
@@ -31,4 +31,12 @@ export declare class Method extends Member {
     static isStringAMethod(method: string): boolean;
     static getMethods(members: Member[]): Method[];
     static FindAll(source: SourceFile, node?: Node): Promise<Method[] | undefined>;
+}
+export declare class InterfaceClassMember extends ClassMember {
+    symbol: Symbol;
+    filePath: string;
+    constructor(symbol: Symbol, filePath: string);
+    readonly name: string;
+    getSymbolSignature(checker: TypeChecker, node?: Node): string;
+    static FindWhere(source: SourceFile, className: string, checker?: TypeChecker): Promise<InterfaceClassMember[] | undefined>;
 }

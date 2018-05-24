@@ -3,6 +3,7 @@ export declare function getInlineRangeFromPosition(namedElement: Identifier, sou
 export declare function createErrorDiagnostic(source: string, filePath: string, range: Range, message: string, code?: string): Diagnostic;
 export declare function cleanUpFilePath(filePath: string): string;
 export declare function find<T>(source: SourceFile, condition: (node: Node) => (T | undefined), deepFind?: boolean): Promise<T[] | undefined>;
+export declare function findWhere<T>(source: SourceFile, condition: (node: Node) => T | undefined): Promise<T | undefined>;
 export declare function extractImportsFromSource(source: SourceFile): ImportDeclaration[] | undefined;
 export declare function getImportFromSourceByModuleName(moduleName: string, source: SourceFile): ImportDeclaration | undefined;
 export declare type Diagnostic = {
