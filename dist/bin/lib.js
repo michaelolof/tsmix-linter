@@ -87,12 +87,12 @@ function parseArguments(args) {
         removeFlagFromArgument(args, itHasWatchFlag.index);
     }
     var itHasLogFlag = argumentHasFlag(args, DefaultFlags.Log, OptionalFlags.Log);
-    var logger = minimalLogger;
+    var logger = normalLogger;
     if (itHasLogFlag) {
         var _logValue = args[itHasLogFlag.index + 1];
         removeFlagFromArgument(args, itHasLogFlag.index);
         if (_logValue === undefined) {
-            _logValue = "minimal";
+            _logValue = "normal";
         }
         else
             args.splice(itHasLogFlag.index + 1, 1);
@@ -110,8 +110,8 @@ function parseArguments(args) {
 function validateLog(log) {
     switch (log) {
         case "diagnostic": return diagnosticLogger;
-        case "normal": return normalLogger;
-        default: return minimalLogger;
+        case "minimal": return minimalLogger;
+        default: return normalLogger;
     }
 }
 function argumentHasFlag(argument, defaultFlag, optionalFlag) {
@@ -141,17 +141,17 @@ function logMatcher(diagnostic, log) {
     }
 }
 function normalLogger(diagnostic) {
-    console.warn("error:(" + (diagnostic.range.start.line + 1) + "," + diagnostic.range.start.character + ")", diagnostic.message.replace("\n", ""), "on", diagnostic.filePath);
     console.log("\n");
+    console.warn("error:(" + (diagnostic.range.start.line + 1) + "," + diagnostic.range.start.character + ")", diagnostic.message.replace("\n", ""), "on", diagnostic.filePath);
 }
 function diagnosticLogger(diagnostic) {
-    console.warn(diagnostic);
     console.log("\n");
+    console.warn(diagnostic);
 }
 function minimalLogger(diagnostic) {
     var rel = diagnostic.filePath.replace(process.cwd().replace("\\", "/"), "");
-    console.warn("error: (" + (diagnostic.range.start.line + 1) + "," + diagnostic.range.start.character + "). " + diagnostic.message.split("\n")[0] + " on " + rel);
     console.log("\n");
+    console.warn("error: (" + (diagnostic.range.start.line + 1) + "," + diagnostic.range.start.character + "). " + diagnostic.message.split("\n")[0] + " on " + rel);
 }
 function helperLog(additionalInfo) {
     if (additionalInfo === void 0) { additionalInfo = ""; }

@@ -106,12 +106,12 @@ function parseArguments(args:string[]):Lintable | Logger {
   }
 
   const itHasLogFlag = argumentHasFlag(args, DefaultFlags.Log, OptionalFlags.Log );
-  let logger = minimalLogger;
+  let logger = normalLogger;
   if( itHasLogFlag ) {
     let _logValue = args[ itHasLogFlag.index + 1 ] as string | undefined;
     removeFlagFromArgument( args, itHasLogFlag.index );
     if( _logValue === undefined ) { 
-      _logValue = "minimal"
+      _logValue = "normal"
     } else args.splice( itHasLogFlag.index + 1, 1 );
     logger = validateLog( _logValue )
   }
@@ -127,8 +127,8 @@ function parseArguments(args:string[]):Lintable | Logger {
 function validateLog(log:string):(diagnostic:Diagnostic) => void {
   switch( log as LogOptions ) {
     case "diagnostic": return diagnosticLogger
-    case "normal": return normalLogger
-    default: return minimalLogger
+    case "minimal": return minimalLogger
+    default: return normalLogger
   }
 }
 
@@ -159,19 +159,19 @@ function logMatcher( diagnostic:Diagnostic, log:LogOptions) {
 }
 
 function normalLogger(diagnostic:Diagnostic) {
-  console.warn( `error:(${diagnostic.range.start.line + 1},${diagnostic.range.start.character})`, diagnostic.message.replace("\n", ""), "on", diagnostic.filePath ) 
   console.log("\n");  
+  console.warn( `error:(${diagnostic.range.start.line + 1},${diagnostic.range.start.character})`, diagnostic.message.replace("\n", ""), "on", diagnostic.filePath ) 
 }
 
 function diagnosticLogger(diagnostic: Diagnostic) {
-  console.warn( diagnostic );
   console.log("\n");
+  console.warn( diagnostic );
 }
 
 function minimalLogger(diagnostic:Diagnostic) {
   const rel = diagnostic.filePath.replace( process.cwd().replace("\\", "/"), "" );
-  console.warn(`error: (${diagnostic.range.start.line + 1},${diagnostic.range.start.character}). ${diagnostic.message.split("\n")[0]} on ${rel}` );
   console.log("\n");
+  console.warn(`error: (${diagnostic.range.start.line + 1},${diagnostic.range.start.character}). ${diagnostic.message.split("\n")[0]} on ${rel}` );
 }
 
 function helperLog(additionalInfo = "") {
