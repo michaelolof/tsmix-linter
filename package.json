@@ -2,7 +2,7 @@
   "name": "tsmix-linter",
   "version": "1.0.5",
   "preferGlobal": "true",
-  "bin": "dist/bin",
+  "bin": "dist/bin/index.js",
   "typings": "dist/index.d.ts",
   "description": "A linter for the typescript based on the typescript-mix library",
   "main": "dist/index.js",
