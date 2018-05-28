@@ -197,7 +197,6 @@ export class DecoratorLinter {
       }
 
       return diagnostics;
-
       // ----------------------------------------------------------------------------------------
       function checkIfMixinPropertiesAreDeclaredInClient(mixinMember:SymbolizedMember) {
         const diagnostics:Diagnostic[] = [];
@@ -233,7 +232,7 @@ export class DecoratorLinter {
             const nameRange = clientSignature.mixinArgument.getNameRange();
             if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) continue;
 
-            const message = `Mixin is not self contained. \nMixin method ${mixinHolder.holderName}.${mixinMember.memberName}(...) calls ${ methodThisCall.codeFormat } which is not defined in the mixin at ${mixinHolder.filePath}. \nEnsure mixin is self contained or use another mixin.`;
+            const message = `Mixin does not correctly implement interface. \nMixin method ${mixinHolder.holderName}.${mixinMember.memberName}(...) calls ${ methodThisCall.codeFormat } which is not defined in the mixin at ${mixinHolder.filePath}. \nEnsure mixin is self contained or use another mixin.`;
             diagnostics.push( 
               createErrorDiagnostic( 
                 constants.appName, 
@@ -251,7 +250,7 @@ export class DecoratorLinter {
 
     function isMixinImplementingAnInterface(mixin:Mixin, mixinArgument:Argument):Diagnostic[] {
       const diagnostics:Diagnostic[] = [];
-      if( mixin.implementsAnInterface ) return diagnostics;
+      if( mixin.getImplementedInterface() ) return diagnostics;
       const nameRange = mixinArgument.getNameRange();
       if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) return diagnostics;
       const message = `Mixin does not implement an interface. \nMixin '${mixinArgument.name}' is not typed or implementing any known interface. \ntypescript-mix mixins must always implement an interface.`;
