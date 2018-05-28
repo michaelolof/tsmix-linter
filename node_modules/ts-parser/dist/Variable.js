@@ -51,6 +51,16 @@ var Variable = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Variable.prototype, "implementsAnInterface", {
+        get: function () {
+            if (this.element.type)
+                return true;
+            else
+                return false;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Variable.prototype.isOf = function (type) {
         return this instanceof type;
     };
@@ -133,7 +143,7 @@ var Variable = (function () {
         });
     };
     Variable.IsAVariable = function (node) {
-        var otherTruths = node["initializer"] && node["type"] && node["initializer"].kind === typescript_1.SyntaxKind.ObjectLiteralExpression;
+        var otherTruths = node["initializer"] && node["initializer"].kind === typescript_1.SyntaxKind.ObjectLiteralExpression;
         if (otherTruths) {
             return typescript_1.isVariableDeclaration(node);
         }

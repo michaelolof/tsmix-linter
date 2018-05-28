@@ -52,6 +52,13 @@ var Class = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Class.prototype, "implementsAnInterface", {
+        get: function () {
+            return true;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Class.prototype.getMembers = function () {
         if (this.__members)
             return this.__members;

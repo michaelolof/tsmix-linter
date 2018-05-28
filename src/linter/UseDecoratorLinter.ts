@@ -60,7 +60,7 @@ export class DecoratorLinter {
   
         const localMixin = self.isMixinLocalDeclared(mixinArgument.name, classesAndVariables!);
         if (localMixin) {
-          diagnostics.push(... await validateLocalMixin(clientSignature, localMixin))
+          diagnostics.push(... await validateLocalMixin(clientSignature, localMixin) )
         } else {
           diagnostics.push(... await validateImportedMixin(clientSignature, mixinArgument) )
         }
@@ -119,8 +119,11 @@ export class DecoratorLinter {
     }
 
     async function validateLocalMixin(clientSignature:ClientSignature, mixin:Mixin): Promise<Diagnostic[]> {
-      const storedMixin = MixinStore.ContainsHolder(mixinStore, mixin.name, mixin.filePath);
       const diagnostics: Diagnostic[] = [];
+
+      diagnostics.push( ...isMixinImplementingAnInterface( mixin, clientSignature.mixinArgument ) );
+      
+      const storedMixin = MixinStore.ContainsHolder(mixinStore, mixin.name, mixin.filePath);
       
       if (storedMixin === undefined) { /** If Mixin is not in the store */
         const localMixinHolder = await mixin.toSymbolizedHolder("mixin", self.checker);
@@ -169,6 +172,8 @@ export class DecoratorLinter {
       // If mixin canoot be found in the source file
       if (mixin === undefined) return diagnostics;
       
+      diagnostics.push( ...isMixinImplementingAnInterface( mixin, clientSignature.mixinArgument ) );
+
       const importedMixinHolder = await mixin.toSymbolizedHolder("mixin", self.checker);
       MixinStore.Push(mixinStore, importedMixinHolder)
       diagnostics.push(... await validateMixin(clientSignature, importedMixinHolder));
@@ -242,6 +247,23 @@ export class DecoratorLinter {
         return diagnostics;
       }
 
+    }
+
+    function isMixinImplementingAnInterface(mixin:Mixin, mixinArgument:Argument):Diagnostic[] {
+      const diagnostics:Diagnostic[] = [];
+      if( mixin.implementsAnInterface ) return diagnostics;
+      const nameRange = mixinArgument.getNameRange();
+      if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) return diagnostics;
+      const message = `Mixin does not implement an interface. \nMixin '${mixinArgument.name}' is not typed or implementing any known interface. \ntypescript-mix mixins must always implement an interface.`;
+      diagnostics.push( 
+        createErrorDiagnostic( 
+          constants.appName, 
+          self.source.fileName, 
+          nameRange,
+          message 
+        )
+      )
+      return diagnostics;
     }
 
   }

@@ -154,12 +154,13 @@ var DecoratorLinter = /** @class */ (function () {
             }
             function validateLocalMixin(clientSignature, mixin) {
                 return __awaiter(this, void 0, void 0, function () {
-                    var storedMixin, diagnostics, localMixinHolder, _a, _b, _c, _d, _e, _f;
+                    var diagnostics, storedMixin, localMixinHolder, _a, _b, _c, _d, _e, _f;
                     return __generator(this, function (_g) {
                         switch (_g.label) {
                             case 0:
-                                storedMixin = index_1.MixinStore.ContainsHolder(mixinStore, mixin.name, mixin.filePath);
                                 diagnostics = [];
+                                diagnostics.push.apply(diagnostics, isMixinImplementingAnInterface(mixin, clientSignature.mixinArgument));
+                                storedMixin = index_1.MixinStore.ContainsHolder(mixinStore, mixin.name, mixin.filePath);
                                 if (!(storedMixin === undefined)) return [3 /*break*/, 3];
                                 return [4 /*yield*/, mixin.toSymbolizedHolder("mixin", self.checker)];
                             case 1:
@@ -219,6 +220,7 @@ var DecoratorLinter = /** @class */ (function () {
                                 // If mixin canoot be found in the source file
                                 if (mixin === undefined)
                                     return [2 /*return*/, diagnostics];
+                                diagnostics.push.apply(diagnostics, isMixinImplementingAnInterface(mixin, clientSignature.mixinArgument));
                                 return [4 /*yield*/, mixin.toSymbolizedHolder("mixin", self.checker)];
                             case 4:
                                 importedMixinHolder = _g.sent();
@@ -308,6 +310,17 @@ var DecoratorLinter = /** @class */ (function () {
                         }
                     });
                 });
+            }
+            function isMixinImplementingAnInterface(mixin, mixinArgument) {
+                var diagnostics = [];
+                if (mixin.implementsAnInterface)
+                    return diagnostics;
+                var nameRange = mixinArgument.getNameRange();
+                if (self.clientHasTSIgnoreFlag(self.source, nameRange))
+                    return diagnostics;
+                var message = "Mixin does not implement an interface. \nMixin '" + mixinArgument.name + "' is not typed or implementing any known interface. \ntypescript-mix mixins must always implement an interface.";
+                diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, self.source.fileName, nameRange, message));
+                return diagnostics;
             }
             var mixinStore, self, diagnostics, classesAndVariables, _i, classesAndVariables_1, classOrVariable, _a, _b, _c, _d, _e, _f;
             return __generator(this, function (_g) {

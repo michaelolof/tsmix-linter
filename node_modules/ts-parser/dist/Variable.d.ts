@@ -8,6 +8,7 @@ export declare class Variable {
     private __members;
     constructor(variable: VariableDeclaration, filePath: string);
     readonly name: string;
+    readonly implementsAnInterface: boolean;
     isOf(type: any): this is Variable;
     getNameRange(source?: SourceFile): Range;
     getMembers(): VariableMember[];
