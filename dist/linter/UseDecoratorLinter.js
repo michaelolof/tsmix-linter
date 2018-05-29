@@ -35,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var typescript_1 = require("typescript");
 var ts_parser_1 = require("ts-parser");
 var index_1 = require("./index");
 var app_1 = require("../app");
@@ -117,7 +118,6 @@ var DecoratorLinter = /** @class */ (function () {
                     function checkIfSignaturesMatch(clientMemberName, clientMemberSignature, delegatedArgument) {
                         var diagnostics = [];
                         var delegatedMemberSignature = self.checker.typeToString(self.checker.getTypeAtLocation(delegatedArgument.element));
-                        console.log("client:", clientMemberSignature, "delegated:", delegatedMemberSignature);
                         if (clientMemberSignature !== delegatedMemberSignature) {
                             var nameRange = delegatedArgument.getNameRange();
                             if (self.clientHasTSIgnoreFlag(self.source, nameRange))
@@ -127,6 +127,22 @@ var DecoratorLinter = /** @class */ (function () {
                         }
                         return diagnostics;
                     }
+                    function getFunctionBody(declaration) {
+                        if (typescript_1.isMethodDeclaration(declaration)) {
+                            if (declaration.body === undefined)
+                                return undefined;
+                            return declaration.body.getFullText();
+                        }
+                        else if (typescript_1.isPropertyDeclaration(declaration)) {
+                            if (declaration.initializer && declaration.initializer["body"]) {
+                                return declaration.initializer["body"].getFullText();
+                            }
+                            else
+                                return undefined;
+                        }
+                        else
+                            return undefined;
+                    }
                     function checkIfThisCallsAreImplementedInClient(arg) {
                         var diagnostics = [];
                         var argSymbol = self.checker.getSymbolAtLocation(arg.element);
@@ -135,9 +151,9 @@ var DecoratorLinter = /** @class */ (function () {
                         if (argSymbol.declarations === undefined)
                             return diagnostics;
                         var declaration = argSymbol.declarations[0];
-                        if (declaration.body === undefined)
+                        var bodyString = getFunctionBody(declaration);
+                        if (bodyString === undefined)
                             return diagnostics;
-                        var bodyString = declaration.body.getFullText();
                         var thisCalls = ts_parser_1.ThisCall.Find(bodyString);
                         var clientMembersName = cls.getMembers().map(function (m) { return m.name; });
                         if (thisCalls.length === 0)

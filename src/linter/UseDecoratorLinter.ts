@@ -1,4 +1,4 @@
-import { SourceFile, TypeChecker, Program, MethodDeclaration } from 'typescript';
+import { SourceFile, TypeChecker, Program, MethodDeclaration, isPropertyDeclaration, Declaration, isMethodDeclaration } from 'typescript';
 import { 
   Import, Class, find, Variable, Argument, createErrorDiagnostic, Diagnostic, SymbolizedHolder, 
   SymbolizedMemberArray, SymbolizedMember, ThisCall, Mixin, Range, getInlineRangeFromPosition, Decorator } from "ts-parser"
@@ -93,7 +93,6 @@ export class DecoratorLinter {
       function checkIfSignaturesMatch(clientMemberName:string, clientMemberSignature:string, delegatedArgument:Argument) {
         const diagnostics:Diagnostic[] = [];
         const delegatedMemberSignature = self.checker.typeToString( self.checker.getTypeAtLocation( delegatedArgument.element ) ) 
-        console.log( "client:", clientMemberSignature, "delegated:", delegatedMemberSignature )
         if( clientMemberSignature !== delegatedMemberSignature ) {
           const nameRange = delegatedArgument.getNameRange();
           if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) return diagnostics;
@@ -110,16 +109,30 @@ export class DecoratorLinter {
         return diagnostics;
       }
 
+      function getFunctionBody(declaration:Declaration):string | undefined {
+        if( isMethodDeclaration( declaration ) ) {
+          if( declaration.body === undefined ) return undefined;
+          return declaration.body.getFullText() as string;
+        }
+        else
+        if( isPropertyDeclaration( declaration ) ) {
+          if( declaration.initializer && (declaration.initializer as any)["body"] ) {
+            return (declaration.initializer as any)["body"].getFullText();
+          }
+          else return undefined;
+        }
+        else return undefined;
+      }
+
       function checkIfThisCallsAreImplementedInClient(arg:Argument) {
         const diagnostics:Diagnostic[] = [];
         const argSymbol = self.checker.getSymbolAtLocation( arg.element as any );        
         if( argSymbol === undefined ) return diagnostics;
         if( argSymbol.declarations === undefined ) return diagnostics;
-        const declaration = argSymbol.declarations[0] as MethodDeclaration
-        if( declaration.body === undefined ) return diagnostics; 
-        const bodyString = declaration.body.getFullText() as string;
+        const declaration = argSymbol.declarations[0] as Declaration
+        const bodyString = getFunctionBody( declaration );
+        if( bodyString === undefined ) return diagnostics;
         const thisCalls = ThisCall.Find( bodyString );
-        
         const clientMembersName = cls.getMembers().map( m => m.name );
         if( thisCalls.length === 0 ) return diagnostics;
         for(let thisCall of thisCalls) {
@@ -141,7 +154,6 @@ export class DecoratorLinter {
         }
         return diagnostics;
       }
-
 
     }
 
