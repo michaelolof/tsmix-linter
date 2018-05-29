@@ -1,7 +1,7 @@
 import { SourceFile, TypeChecker, Program, MethodDeclaration } from 'typescript';
 import { 
   Import, Class, find, Variable, Argument, createErrorDiagnostic, Diagnostic, SymbolizedHolder, 
-  SymbolizedMemberArray, SymbolizedMember, ThisCall, Mixin, Range } from "ts-parser"
+  SymbolizedMemberArray, SymbolizedMember, ThisCall, Mixin, Range, getInlineRangeFromPosition } from "ts-parser"
 import { MixinStore } from './index';
 import { constants } from '../app';
 
@@ -72,8 +72,8 @@ export class DecoratorLinter {
     async function validateClassUsingDelegateDecorator(cls:Class) {
       const diagnostics:Diagnostic[] = [];
       const membersUsingDecorator = self.isClassADelegateDecoratorClient( cls );
-      if( !membersUsingDecorator ) return diagnostics;
-      
+      if( !membersUsingDecorator ) return diagnostics;   
+
       for(let memberUsingDecorator of membersUsingDecorator) {
         diagnostics.push(
            ...validateMemberUsingDecorator( memberUsingDecorator.decorator.getArguments() )
@@ -86,13 +86,14 @@ export class DecoratorLinter {
         const diagnostics:Diagnostic[] = [];
         
         for(let arg of args) {
-          const argSymbol = self.checker.getSymbolAtLocation( arg.element as any );
+          const argSymbol = self.checker.getSymbolAtLocation( arg.element as any );        
           if( argSymbol === undefined ) continue;
           if( argSymbol.declarations === undefined ) continue;
           const declaration = argSymbol.declarations[0] as MethodDeclaration
           if( declaration.body === undefined ) continue 
           const bodyString = declaration.body.getFullText() as string;
           const thisCalls = ThisCall.Find( bodyString );
+          
           const clientMembersName = cls.getMembers().map( m => m.name );
           if( thisCalls.length === 0 ) continue;
           for(let thisCall of thisCalls) {
