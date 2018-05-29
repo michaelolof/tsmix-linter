@@ -122,7 +122,7 @@ var DecoratorLinter = /** @class */ (function () {
                             var nameRange = delegatedArgument.getNameRange();
                             if (self.clientHasTSIgnoreFlag(self.source, nameRange))
                                 return diagnostics;
-                            var message = "Delegated Method Type mismatch. \nMethod '" + clientMemberName + ":" + clientMemberSignature + "' does not match method '" + delegatedArgument.name + ":" + delegatedMemberSignature + "'";
+                            var message = "Delegated Method Type Mismatch. \nMethod '" + clientMemberName + ":" + clientMemberSignature + "' does not match method '" + delegatedArgument.name + ":" + delegatedMemberSignature + "'";
                             diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, delegatedArgument.filePath, nameRange, message));
                         }
                         return diagnostics;
@@ -164,8 +164,8 @@ var DecoratorLinter = /** @class */ (function () {
                             if (self.clientHasTSIgnoreFlag(self.source, nameRange))
                                 continue;
                             if (clientMembersName.indexOf(thisCall.name) < 0) {
-                                var code = thisCall.type === "method" ? "this." + thisCall.name + "(...) method" : "this." + thisCall.name + " property";
-                                var message = "Mixin Dependency Not Found: \n" + code + " not found. \nDelegated method " + arg.name + " calls a " + code + " which is not declared in the client " + cls.name + " class";
+                                var code = thisCall.type === "method" ? "'this." + thisCall.name + "(...)' method" : "'this." + thisCall.name + "' property";
+                                var message = "Mixin Dependency Not Found: \n" + code + " not found. \nDelegated method '" + arg.name + "' calls a " + code + " which is not declared in the client '" + cls.name + "' class";
                                 diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, arg.filePath, nameRange, message));
                             }
                         }

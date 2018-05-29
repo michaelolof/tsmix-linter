@@ -96,7 +96,7 @@ export class DecoratorLinter {
         if( clientMemberSignature !== delegatedMemberSignature ) {
           const nameRange = delegatedArgument.getNameRange();
           if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) return diagnostics;
-          const message = `Delegated Method Type mismatch. \nMethod '${clientMemberName}:${clientMemberSignature}' does not match method '${delegatedArgument.name}:${delegatedMemberSignature}'`;
+          const message = `Delegated Method Type Mismatch. \nMethod '${clientMemberName}:${clientMemberSignature}' does not match method '${delegatedArgument.name}:${delegatedMemberSignature}'`;
           diagnostics.push(
             createErrorDiagnostic(
               constants.appName,
@@ -140,8 +140,8 @@ export class DecoratorLinter {
           if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) continue;
 
           if( clientMembersName.indexOf( thisCall.name ) < 0 ) {
-            const code = thisCall.type === "method" ? "this."+ thisCall.name + "(...) method" : "this." + thisCall.name + " property";
-            const message = `Mixin Dependency Not Found: \n${code} not found. \nDelegated method ${arg.name} calls a ${code} which is not declared in the client ${cls.name} class`;
+            const code = thisCall.type === "method" ? "'this."+ thisCall.name + "(...)' method" : "'this." + thisCall.name + "' property";
+            const message = `Mixin Dependency Not Found: \n${code} not found. \nDelegated method '${arg.name}' calls a ${code} which is not declared in the client '${cls.name}' class`;
             diagnostics.push( 
               createErrorDiagnostic( 
                 constants.appName,
