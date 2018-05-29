@@ -9,7 +9,7 @@ import { Diagnostic, UseDecoratorSourceLintTree } from 'ts-parser';
  * 1). node.js tsmix-linter/bin "somefile.ts"
  * 2). node.js tsmix-linter/bin --root "c:/Users/some/path/to/the/root"
  */
-const version = "Version 1.0.2";
+const version = "Version 1.0.11";
 
 
 type LogOptions = "diagnostic" | "minimal" | "normal"
@@ -119,7 +119,7 @@ function parseArguments(args:string[]):Lintable | Logger {
   // This means we are linting a file.
   const remainingArgument = args[0] as string | undefined;
   const method = itHasWatchFlag ? "watch" : "compile"
-  if( remainingArgument ) return new Lintable( remainingArgument, { method, target:"file", logger })
+  if( remainingArgument && remainingArgument !== "." ) return new Lintable( remainingArgument, { method, target:"file", logger })
   else return new Lintable( process.cwd(), {method, target:"folder", logger }) 
   //--------------------------------------------------------------------------------
 }
@@ -195,11 +195,11 @@ const defaultMessage = `Version: ${version}
 
 Example: 
   tsmix-linter "hello.ts" (to lint a file)
-  tsmix-linter --root "location/to/root/" (to lint all .ts files in the root folder)
+  tsmix-linter "." (to lint all .ts files in the current directory)
            
 Options:
   --help, -h       To print this message.
   --version, -v    Prints out the version number
   --watch, -w      Specify if linting is done in watch mode.
   --log, -l        Specify how errors are logged. Either "minimal", "normal" or "diagnostic". 
-                   defaults to "minimal"`;
+                   defaults to "normal"`;

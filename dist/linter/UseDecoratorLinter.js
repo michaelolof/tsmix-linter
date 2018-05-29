@@ -266,7 +266,7 @@ var DecoratorLinter = /** @class */ (function () {
                                 var nameRange = clientSignature.mixinArgument.getNameRange();
                                 if (self.clientHasTSIgnoreFlag(self.source, nameRange))
                                     continue;
-                                var message = "Mixin does not correctly implement interface. \nMixin method " + mixinHolder.holderName + "." + mixinMember.memberName + "(...) calls " + methodThisCall.codeFormat + " which is not defined in the mixin at " + mixinHolder.filePath + ". \nEnsure mixin is self contained or use another mixin.";
+                                var message = "Mixin does not correctly implement the interface. \nMixin method " + mixinHolder.holderName + "." + mixinMember.memberName + "(...) calls " + methodThisCall.codeFormat + " which is not defined in the mixin at " + mixinHolder.filePath + ". \nEnsure mixin is self contained and purely implements its interface.";
                                 diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, client.filePath, nameRange, message));
                             }
                         }

@@ -9,7 +9,7 @@ var __1 = require("..");
  * 1). node.js tsmix-linter/bin "somefile.ts"
  * 2). node.js tsmix-linter/bin --root "c:/Users/some/path/to/the/root"
  */
-var version = "Version 1.0.2";
+var version = "Version 1.0.11";
 var DefaultFlags;
 (function (DefaultFlags) {
     DefaultFlags["Help"] = "--help";
@@ -101,7 +101,7 @@ function parseArguments(args) {
     // This means we are linting a file.
     var remainingArgument = args[0];
     var method = itHasWatchFlag ? "watch" : "compile";
-    if (remainingArgument)
+    if (remainingArgument && remainingArgument !== ".")
         return new Lintable(remainingArgument, { method: method, target: "file", logger: logger });
     else
         return new Lintable(process.cwd(), { method: method, target: "folder", logger: logger });
@@ -173,5 +173,5 @@ var Lintable = /** @class */ (function () {
     }
     return Lintable;
 }());
-var defaultMessage = "Version: " + version + "\n\nExample: \n  tsmix-linter \"hello.ts\" (to lint a file)\n  tsmix-linter --root \"location/to/root/\" (to lint all .ts files in the root folder)\n           \nOptions:\n  --help, -h       To print this message.\n  --version, -v    Prints out the version number\n  --watch, -w      Specify if linting is done in watch mode.\n  --log, -l        Specify how errors are logged. Either \"minimal\", \"normal\" or \"diagnostic\". \n                   defaults to \"minimal\"";
+var defaultMessage = "Version: " + version + "\n\nExample: \n  tsmix-linter \"hello.ts\" (to lint a file)\n  tsmix-linter \".\" (to lint all .ts files in the current directory)\n           \nOptions:\n  --help, -h       To print this message.\n  --version, -v    Prints out the version number\n  --watch, -w      Specify if linting is done in watch mode.\n  --log, -l        Specify how errors are logged. Either \"minimal\", \"normal\" or \"diagnostic\". \n                   defaults to \"normal\"";
 //# sourceMappingURL=lib.js.map
