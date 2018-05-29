@@ -105,33 +105,52 @@ var DecoratorLinter = /** @class */ (function () {
             function validateClassUsingDelegateDecorator(cls) {
                 return __awaiter(this, void 0, void 0, function () {
                     //----------------------------------------------------------------------------------
-                    function validateMemberUsingDecorator(args) {
+                    function validateMemberUsingDecorator(member) {
                         var diagnostics = [];
-                        for (var _i = 0, args_1 = args; _i < args_1.length; _i++) {
-                            var arg = args_1[_i];
-                            var argSymbol = self.checker.getSymbolAtLocation(arg.element);
-                            if (argSymbol === undefined)
+                        for (var _i = 0, _a = member.decorator.getArguments(); _i < _a.length; _i++) {
+                            var arg = _a[_i];
+                            diagnostics.push.apply(diagnostics, checkIfSignaturesMatch(member.memberName, member.memberSignature, arg));
+                            diagnostics.push.apply(diagnostics, checkIfThisCallsAreImplementedInClient(arg));
+                        }
+                        return diagnostics;
+                    }
+                    function checkIfSignaturesMatch(clientMemberName, clientMemberSignature, delegatedArgument) {
+                        var diagnostics = [];
+                        var delegatedMemberSignature = self.checker.typeToString(self.checker.getTypeAtLocation(delegatedArgument.element));
+                        console.log("client:", clientMemberSignature, "delegated:", delegatedMemberSignature);
+                        if (clientMemberSignature !== delegatedMemberSignature) {
+                            var nameRange = delegatedArgument.getNameRange();
+                            if (self.clientHasTSIgnoreFlag(self.source, nameRange))
+                                return diagnostics;
+                            var message = "Delegated Method Type mismatch. \nMethod '" + clientMemberName + ":" + clientMemberSignature + "' does not match method '" + delegatedArgument.name + ":" + delegatedMemberSignature + "'";
+                            diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, delegatedArgument.filePath, nameRange, message));
+                        }
+                        return diagnostics;
+                    }
+                    function checkIfThisCallsAreImplementedInClient(arg) {
+                        var diagnostics = [];
+                        var argSymbol = self.checker.getSymbolAtLocation(arg.element);
+                        if (argSymbol === undefined)
+                            return diagnostics;
+                        if (argSymbol.declarations === undefined)
+                            return diagnostics;
+                        var declaration = argSymbol.declarations[0];
+                        if (declaration.body === undefined)
+                            return diagnostics;
+                        var bodyString = declaration.body.getFullText();
+                        var thisCalls = ts_parser_1.ThisCall.Find(bodyString);
+                        var clientMembersName = cls.getMembers().map(function (m) { return m.name; });
+                        if (thisCalls.length === 0)
+                            return diagnostics;
+                        for (var _i = 0, thisCalls_1 = thisCalls; _i < thisCalls_1.length; _i++) {
+                            var thisCall = thisCalls_1[_i];
+                            var nameRange = arg.getNameRange();
+                            if (self.clientHasTSIgnoreFlag(self.source, nameRange))
                                 continue;
-                            if (argSymbol.declarations === undefined)
-                                continue;
-                            var declaration = argSymbol.declarations[0];
-                            if (declaration.body === undefined)
-                                continue;
-                            var bodyString = declaration.body.getFullText();
-                            var thisCalls = ts_parser_1.ThisCall.Find(bodyString);
-                            var clientMembersName = cls.getMembers().map(function (m) { return m.name; });
-                            if (thisCalls.length === 0)
-                                continue;
-                            for (var _a = 0, thisCalls_1 = thisCalls; _a < thisCalls_1.length; _a++) {
-                                var thisCall = thisCalls_1[_a];
-                                var nameRange = arg.getNameRange();
-                                if (self.clientHasTSIgnoreFlag(self.source, nameRange))
-                                    continue;
-                                if (clientMembersName.indexOf(thisCall.name) < 0) {
-                                    var code = thisCall.type === "method" ? "this." + thisCall.name + "(...) method" : "this." + thisCall.name + " property";
-                                    var message = "Mixin Dependency Not Found: \n" + code + " not found. \nDelegated method " + arg.name + " calls a " + code + " which is not declared in the client " + cls.name + " class";
-                                    diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, arg.filePath, nameRange, message));
-                                }
+                            if (clientMembersName.indexOf(thisCall.name) < 0) {
+                                var code = thisCall.type === "method" ? "this." + thisCall.name + "(...) method" : "this." + thisCall.name + " property";
+                                var message = "Mixin Dependency Not Found: \n" + code + " not found. \nDelegated method " + arg.name + " calls a " + code + " which is not declared in the client " + cls.name + " class";
+                                diagnostics.push(ts_parser_1.createErrorDiagnostic(app_1.constants.appName, arg.filePath, nameRange, message));
                             }
                         }
                         return diagnostics;
@@ -144,7 +163,7 @@ var DecoratorLinter = /** @class */ (function () {
                             return [2 /*return*/, diagnostics];
                         for (_i = 0, membersUsingDecorator_1 = membersUsingDecorator; _i < membersUsingDecorator_1.length; _i++) {
                             memberUsingDecorator = membersUsingDecorator_1[_i];
-                            diagnostics.push.apply(diagnostics, validateMemberUsingDecorator(memberUsingDecorator.decorator.getArguments()));
+                            diagnostics.push.apply(diagnostics, validateMemberUsingDecorator(memberUsingDecorator));
                         }
                         return [2 /*return*/, diagnostics
                             //----------------------------------------------------------------------------------
@@ -378,12 +397,14 @@ var DecoratorLinter = /** @class */ (function () {
         return { arguments: decorator.getArguments() };
     };
     DecoratorLinter.prototype.isClassADelegateDecoratorClient = function (cls) {
+        var _this = this;
         var membersUsingDecorator = cls.hasMembersUsingDecorator(DecoratorLinter.DelegateDecoratorId);
         if (membersUsingDecorator.length === 0)
             return false;
         var memberToDecorator = membersUsingDecorator.map(function (member) {
             return {
                 memberName: member.name,
+                memberSignature: member.getSymbolSignature(_this.checker),
                 decorator: member.getDecorator(DecoratorLinter.DelegateDecoratorId)
             };
         });

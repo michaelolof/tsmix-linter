@@ -1,7 +1,7 @@
 import { SourceFile, TypeChecker, Program, MethodDeclaration } from 'typescript';
 import { 
   Import, Class, find, Variable, Argument, createErrorDiagnostic, Diagnostic, SymbolizedHolder, 
-  SymbolizedMemberArray, SymbolizedMember, ThisCall, Mixin, Range, getInlineRangeFromPosition } from "ts-parser"
+  SymbolizedMemberArray, SymbolizedMember, ThisCall, Mixin, Range, getInlineRangeFromPosition, Decorator } from "ts-parser"
 import { MixinStore } from './index';
 import { constants } from '../app';
 
@@ -75,47 +75,73 @@ export class DecoratorLinter {
       if( !membersUsingDecorator ) return diagnostics;   
 
       for(let memberUsingDecorator of membersUsingDecorator) {
-        diagnostics.push(
-           ...validateMemberUsingDecorator( memberUsingDecorator.decorator.getArguments() )
-        )
+        diagnostics.push(...validateMemberUsingDecorator( memberUsingDecorator ) );
       }
       return diagnostics
 
       //----------------------------------------------------------------------------------
-      function validateMemberUsingDecorator(args:Argument[]) {
+      function validateMemberUsingDecorator(member:{memberName:string, memberSignature:string, decorator:Decorator}) {
         const diagnostics:Diagnostic[] = [];
         
-        for(let arg of args) {
-          const argSymbol = self.checker.getSymbolAtLocation( arg.element as any );        
-          if( argSymbol === undefined ) continue;
-          if( argSymbol.declarations === undefined ) continue;
-          const declaration = argSymbol.declarations[0] as MethodDeclaration
-          if( declaration.body === undefined ) continue 
-          const bodyString = declaration.body.getFullText() as string;
-          const thisCalls = ThisCall.Find( bodyString );
-          
-          const clientMembersName = cls.getMembers().map( m => m.name );
-          if( thisCalls.length === 0 ) continue;
-          for(let thisCall of thisCalls) {
-            const nameRange = arg.getNameRange();
-            if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) continue;
+        for(let arg of member.decorator.getArguments() ) {
+          diagnostics.push( ...checkIfSignaturesMatch( member.memberName, member.memberSignature, arg ) );
+          diagnostics.push( ...checkIfThisCallsAreImplementedInClient( arg ) );
+        }
+        return diagnostics;
+      }
 
-            if( clientMembersName.indexOf( thisCall.name ) < 0 ) {
-              const code = thisCall.type === "method" ? "this."+ thisCall.name + "(...) method" : "this." + thisCall.name + " property";
-              const message = `Mixin Dependency Not Found: \n${code} not found. \nDelegated method ${arg.name} calls a ${code} which is not declared in the client ${cls.name} class`;
-              diagnostics.push( 
-                createErrorDiagnostic( 
-                  constants.appName,
-                  arg.filePath,
-                  nameRange,
-                  message,
-                )
+      function checkIfSignaturesMatch(clientMemberName:string, clientMemberSignature:string, delegatedArgument:Argument) {
+        const diagnostics:Diagnostic[] = [];
+        const delegatedMemberSignature = self.checker.typeToString( self.checker.getTypeAtLocation( delegatedArgument.element ) ) 
+        console.log( "client:", clientMemberSignature, "delegated:", delegatedMemberSignature )
+        if( clientMemberSignature !== delegatedMemberSignature ) {
+          const nameRange = delegatedArgument.getNameRange();
+          if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) return diagnostics;
+          const message = `Delegated Method Type mismatch. \nMethod '${clientMemberName}:${clientMemberSignature}' does not match method '${delegatedArgument.name}:${delegatedMemberSignature}'`;
+          diagnostics.push(
+            createErrorDiagnostic(
+              constants.appName,
+              delegatedArgument.filePath,
+              nameRange,
+              message
+            )
+          )
+        }
+        return diagnostics;
+      }
+
+      function checkIfThisCallsAreImplementedInClient(arg:Argument) {
+        const diagnostics:Diagnostic[] = [];
+        const argSymbol = self.checker.getSymbolAtLocation( arg.element as any );        
+        if( argSymbol === undefined ) return diagnostics;
+        if( argSymbol.declarations === undefined ) return diagnostics;
+        const declaration = argSymbol.declarations[0] as MethodDeclaration
+        if( declaration.body === undefined ) return diagnostics; 
+        const bodyString = declaration.body.getFullText() as string;
+        const thisCalls = ThisCall.Find( bodyString );
+        
+        const clientMembersName = cls.getMembers().map( m => m.name );
+        if( thisCalls.length === 0 ) return diagnostics;
+        for(let thisCall of thisCalls) {
+          const nameRange = arg.getNameRange();
+          if( self.clientHasTSIgnoreFlag( self.source, nameRange ) ) continue;
+
+          if( clientMembersName.indexOf( thisCall.name ) < 0 ) {
+            const code = thisCall.type === "method" ? "this."+ thisCall.name + "(...) method" : "this." + thisCall.name + " property";
+            const message = `Mixin Dependency Not Found: \n${code} not found. \nDelegated method ${arg.name} calls a ${code} which is not declared in the client ${cls.name} class`;
+            diagnostics.push( 
+              createErrorDiagnostic( 
+                constants.appName,
+                arg.filePath,
+                nameRange,
+                message,
               )
-            }
+            )
           }
         }
         return diagnostics;
       }
+
 
     }
 
@@ -289,6 +315,7 @@ export class DecoratorLinter {
     const memberToDecorator = membersUsingDecorator.map( member => { 
       return {
         memberName: member.name,
+        memberSignature: member.getSymbolSignature( this.checker ),
         decorator: member.getDecorator( DecoratorLinter.DelegateDecoratorId )!
       }
     });
