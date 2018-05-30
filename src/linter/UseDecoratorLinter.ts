@@ -133,7 +133,7 @@ export class DecoratorLinter {
         const bodyString = getFunctionBody( declaration );
         if( bodyString === undefined ) return diagnostics;
         const thisCalls = ThisCall.Find( bodyString );
-        const clientMembersName = cls.getMembers().map( m => m.name );
+        const clientMembersName = cls.getInterfaceMembers().map( m => m.name );
         if( thisCalls.length === 0 ) return diagnostics;
         for(let thisCall of thisCalls) {
           const nameRange = arg.getNameRange();

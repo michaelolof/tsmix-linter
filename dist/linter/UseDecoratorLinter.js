@@ -155,7 +155,7 @@ var DecoratorLinter = /** @class */ (function () {
                         if (bodyString === undefined)
                             return diagnostics;
                         var thisCalls = ts_parser_1.ThisCall.Find(bodyString);
-                        var clientMembersName = cls.getMembers().map(function (m) { return m.name; });
+                        var clientMembersName = cls.getInterfaceMembers().map(function (m) { return m.name; });
                         if (thisCalls.length === 0)
                             return diagnostics;
                         for (var _i = 0, thisCalls_1 = thisCalls; _i < thisCalls_1.length; _i++) {
