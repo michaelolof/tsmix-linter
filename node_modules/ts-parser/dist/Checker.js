@@ -64,6 +64,15 @@ var SymbolizedHolder = (function () {
         }
         return methodMembers;
     };
+    SymbolizedHolder.prototype.getAllMembersExceptProperties = function () {
+        var members = new SymbolizedMemberArray();
+        for (var _i = 0, _a = this.members; _i < _a.length; _i++) {
+            var member = _a[_i];
+            if (member.type !== "property")
+                members.push(member);
+        }
+        return members;
+    };
     return SymbolizedHolder;
 }());
 exports.SymbolizedHolder = SymbolizedHolder;

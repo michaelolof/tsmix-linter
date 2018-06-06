@@ -1,5 +1,6 @@
 import { ThisCall } from './Statement';
 import { Range } from "./utilities";
+import { MemberType } from './Member';
 export declare class SymbolizedHolder {
     readonly holderName: string;
     readonly holderRange: Range;
@@ -10,6 +11,7 @@ export declare class SymbolizedHolder {
     constructor(holderName: string, holderRange: Range, filePath: string, type: "mixin" | "client", members: SymbolizedMember[], mixins?: string[] | undefined);
     getMemberProperties(): SymbolizedMemberArray;
     getMemberMethods(): SymbolizedMemberArray;
+    getAllMembersExceptProperties(): SymbolizedMemberArray;
 }
 export declare class SymbolArray<T> {
     array: T[];
@@ -26,14 +28,14 @@ export declare class SymbolizedHolderArray extends SymbolArray<SymbolizedHolder>
     getSymbolByName(name: string): SymbolizedHolder | undefined;
 }
 export declare class SymbolizedMember {
-    type: "property" | "method";
+    type: MemberType;
     memberName: string;
     memberRange: Range;
     signature: string;
     accessor: "static" | "instance";
     methodThisCalls: ThisCall[] | undefined;
     methodsNoOfArguments: number | undefined;
-    constructor(type: "property" | "method", memberName: string, memberRange: Range, signature: string, accessor: "static" | "instance", methodThisCalls?: ThisCall[] | undefined, methodsNoOfArguments?: number | undefined);
+    constructor(type: MemberType, memberName: string, memberRange: Range, signature: string, accessor: "static" | "instance", methodThisCalls?: ThisCall[] | undefined, methodsNoOfArguments?: number | undefined);
 }
 export declare class SymbolizedMemberArray extends SymbolArray<SymbolizedMember> {
     doesntHaveMember(member: SymbolizedMember): SymbolizedMember[];

@@ -66,6 +66,19 @@ var Member = (function () {
         enumerable: true,
         configurable: true
     });
+    Member.prototype.getType = function () {
+        switch (this.element.kind) {
+            case typescript_1.SyntaxKind.PropertyDeclaration:
+                return "property";
+            case typescript_1.SyntaxKind.MethodDeclaration:
+                return "method";
+            case typescript_1.SyntaxKind.GetAccessor:
+                return "getter";
+            case typescript_1.SyntaxKind.SetAccessor:
+                return "setter";
+            default: return "property";
+        }
+    };
     Member.prototype.isAMethod = function () {
         return Method.isAMethod(this.element);
     };
@@ -81,10 +94,9 @@ var Member = (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        type = "property";
+                        type = this.getType();
                         methodThisCall = undefined;
-                        if (!this.isAMethod()) return [3, 2];
-                        type = "method";
+                        if (!(type === "method")) return [3, 2];
                         return [4, this.getMethodBodyThisCalls()];
                     case 1:
                         methodThisCall = _a.sent();

@@ -3,11 +3,13 @@ import { Decorator } from './Decorator';
 import { ThisCall } from './Statement';
 import { Range } from './utilities';
 import { SymbolizedMember } from './Checker';
+export declare type MemberType = "method" | "property" | "getter" | "setter";
 export declare class Member {
     readonly element: Node;
     readonly filePath: string;
     constructor(memberElement: Node, filePath: string);
     readonly name: string;
+    getType(): MemberType;
     isAMethod(): boolean;
     getSymbolSignature(checker: TypeChecker, node?: Node): string;
     getSymbolizedMember(checker: TypeChecker, node?: Node): Promise<SymbolizedMember>;
