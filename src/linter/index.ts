@@ -1,5 +1,5 @@
 export * from './UseDecoratorLinter';
-import { SymbolizedHolder, SymbolizedHolderArray,  } from "ts-parser";
+import { SymbolizedHolder, SymbolizedHolderArray, Diagnostic as tsParserDiagnostic } from 'ts-parser';
 
 export class MixinStore {
   [filePath:string]: SymbolizedHolderArray|undefined
@@ -24,6 +24,9 @@ export class MixinStore {
   
 }
 
+export interface Diagnostic extends tsParserDiagnostic {
+  id?:string
+}
 
 
 

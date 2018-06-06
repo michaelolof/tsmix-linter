@@ -1,9 +1,12 @@
 import { SourceFile, TypeChecker, Program, MethodDeclaration, isPropertyDeclaration, Declaration, isMethodDeclaration } from 'typescript';
 import { 
-  Import, Class, find, Variable, Argument, createErrorDiagnostic, Diagnostic, SymbolizedHolder, 
+  Import, Class, find, Variable, Argument, Diagnostic, SymbolizedHolder, 
   SymbolizedMemberArray, SymbolizedMember, ThisCall, Mixin, Range, getInlineRangeFromPosition, Decorator } from "ts-parser"
 import { MixinStore } from './index';
 import { constants } from '../app';
+import { createErrorDiagnostic } from '../utilities';
+import { ErrorCode } from './errors';
+
 
 export class DecoratorLinter {
 
@@ -99,10 +102,11 @@ export class DecoratorLinter {
           const message = `Delegated Method Type Mismatch. \nMethod '${clientMemberName}:${clientMemberSignature}' does not match method '${delegatedArgument.name}:${delegatedMemberSignature}'`;
           diagnostics.push(
             createErrorDiagnostic(
-              constants.appName,
               delegatedArgument.filePath,
               nameRange,
-              message
+              message,
+              ErrorCode.Four,
+              delegatedArgument.name,              
             )
           )
         }
@@ -144,10 +148,11 @@ export class DecoratorLinter {
             const message = `Mixin Dependency Not Found: \n${code} not found. \nDelegated method '${arg.name}' calls a ${code} which is not declared in the client '${cls.name}' class`;
             diagnostics.push( 
               createErrorDiagnostic( 
-                constants.appName,
                 arg.filePath,
                 nameRange,
                 message,
+                ErrorCode.One,
+                arg.name,
               )
             )
           }
@@ -201,7 +206,11 @@ export class DecoratorLinter {
         const message = `Mixin not found in ${importedObject.toLocation}`;
         diagnostics.push(
           createErrorDiagnostic(
-            constants.appName, importedObject.toLocation, mixinArgument.getNameRange(), message
+            importedObject.toLocation, 
+            mixinArgument.getNameRange(), 
+            message,
+            ErrorCode.Five,
+            mixinArgument.name,
           )
         );
         return diagnostics;
@@ -247,10 +256,11 @@ export class DecoratorLinter {
           const message = `Mixin dependency not found. \n(property) '${ mixinMember.memberName }:${ mixinMember.signature }' found in mixin ${ mixinHolder.holderName } is missing in the implementing class '${ client.name }'.`;
           diagnostics.push( 
             createErrorDiagnostic( 
-              constants.appName, 
               client.filePath, 
               nameRange, 
-              message 
+              message,
+              ErrorCode.One,
+              client.name, 
             ) 
           );
         }
@@ -274,10 +284,11 @@ export class DecoratorLinter {
             const message = `Mixin does not correctly implement the interface. \nMixin method ${mixinHolder.holderName}.${mixinMember.memberName}(...) calls ${ methodThisCall.codeFormat } which is not defined in the mixin at ${mixinHolder.filePath}. \nEnsure mixin is self contained and purely implements its interface.`;
             diagnostics.push( 
               createErrorDiagnostic( 
-                constants.appName, 
                 client.filePath, 
                 nameRange,
-                message 
+                message,
+                ErrorCode.Three,
+                clientSignature.mixinArgument.name,
               )
             )
           }
@@ -295,10 +306,11 @@ export class DecoratorLinter {
       const message = `Mixin does not implement an interface. \nMixin '${mixinArgument.name}' is not typed or implementing any known interface. \ntypescript-mix mixins must always implement an interface.`;
       diagnostics.push( 
         createErrorDiagnostic( 
-          constants.appName, 
           self.source.fileName, 
           nameRange,
-          message 
+          message,
+          ErrorCode.Two,
+          mixinArgument.name, 
         )
       )
       return diagnostics;
